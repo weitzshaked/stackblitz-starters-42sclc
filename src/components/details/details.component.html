@@ -7,12 +7,14 @@ src="./images/Header1.png"/>
           <h1 class="title">“Kennedy family members' embrace carries deeper meaning for Biden”</h1>
           <h2>April 21, 2024 at 6:00 a.m. EDT</h2>
           <div class="bar"></div>
-          <ul>
-            <li>Factuality 0.5/1 50% Moderate</li>
-            <li>List Item 2</li>
-            <li>List Item 3</li>
-            <!-- Add more list items as needed -->
-          </ul>
+          <div class="rating-container">
+            <!-- <div *ngFor="let category of categories" class="rating-category">
+              <span class="category-name">{{ category.name }}</span>
+              <span class="category-score">{{ category.score }}/1</span>
+              <span class="category-percentage">{{ category.percentage }}%</span>
+              <span class="category-level" [ngClass]="category.level.toLowerCase()">{{ category.level }}</span>
+            </div> -->
+          </div>
         </div>
         <div class="right-column">
           <!-- Content for the right column box -->
