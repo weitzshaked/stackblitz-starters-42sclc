@@ -22,6 +22,8 @@ export class DetailsComponent {
   public categories: RatingCategory[] = [
     { name: 'Factuality', score: 0.5, percentage: 50, level: 'Moderate' },
     { name: 'Objectivity', score: 0.5, percentage: 50, level: 'Moderate' },
+    { name: 'Bias', score: 0.5, percentage: 50, level: 'Low' },
+    { name: 'Depth', score: 0.5, percentage: 50, level: 'High' },
     // ... other categories
   ];
 
