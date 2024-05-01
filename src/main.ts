@@ -1,23 +1,17 @@
-import { Component, importProvidersFrom } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterModule, provideRouter } from '@angular/router';
 import { bootstrapApplication } from '@angular/platform-browser';
 
 import { HomeComponent } from './components/home/home.component'
 import { DetailsComponent } from './components/details/details.component';
 
 import 'zone.js';
-import { APP_BASE_HREF } from '@angular/common';
-
-const routes: Routes = [
-  { path: '', component: HomeComponent }, // Default route (main page)
-  { path: 'details', component: DetailsComponent }
-];
 
 @Component({
   selector: 'app-root',
   standalone: true,
   templateUrl: './main.component.html',
-  imports: [HomeComponent, DetailsComponent],
+  imports: [RouterModule],
 })
 export class App {
   name = 'Angular';
@@ -25,7 +19,9 @@ export class App {
 
 bootstrapApplication(App, {
   providers: [
-    { provide: APP_BASE_HREF, useValue: '/' }, // Provide base href
-    importProvidersFrom(RouterModule.forRoot(routes)) // Import routing providers
+    provideRouter([
+      { path: '', component: HomeComponent },
+      { path: 'details', component: DetailsComponent },
+    ])
   ]
 });
