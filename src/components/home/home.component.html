@@ -7,8 +7,8 @@
     src="./images/Banner.png"
     />
     <form class="input-container">
-          <input type="text"  class="form-control" matInput placeholder="Paste a link of an article you want to assess">
-          <mat-icon matSuffix>keyboard_arrow_right</mat-icon>
+        <input type="text"  class="form-control" matInput placeholder="Paste a link of an article you want to assess" (keyup.enter)="navigateToDetails()" (input)='onInputChange($event)'>
+        <mat-icon matSuffix>keyboard_arrow_right</mat-icon>
     </form>
     <img
     class="table"

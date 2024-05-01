@@ -16,16 +16,18 @@ export class HomeComponent {
   inputValue: string = '';
 
   constructor(private router: Router) {}
+  private newLink: string = '';
 
-  public onInputChange(newValue: string){
-    console.log(newValue);
-    //todo call BE API with link
-
-    this.navigateToDetails();
+  public onInputChange(event: any){
+    if(event && event.target.value) {
+      console.log(event.target.value);
+      this.newLink = event.target.value;
+    }
   }
 
   public navigateToDetails() {
+    //todo call BE API with link
     // Navigate to details page, optionally passing data
-    this.router.navigate(['/details'], { state: { inputValue: this.inputValue } });
+    this.router.navigate(['/details'], { state: { inputValue: this.newLink } });
   }
 }

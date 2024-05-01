@@ -8,19 +8,24 @@ import { DetailsComponent } from './components/details/details.component';
 import 'zone.js';
 import { APP_BASE_HREF } from '@angular/common';
 
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  templateUrl: './main.component.html',
-  imports: [HomeComponent],
-})
-export class App {
-  name = 'Angular';
-}
-
 const routes: Routes = [
   { path: '', component: HomeComponent }, // Default route (main page)
   { path: 'details', component: DetailsComponent }
 ];
 
-bootstrapApplication(App);
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './main.component.html',
+  imports: [HomeComponent, DetailsComponent],
+})
+export class App {
+  name = 'Angular';
+}
+
+bootstrapApplication(App, {
+  providers: [
+    { provide: APP_BASE_HREF, useValue: '/' }, // Provide base href
+    importProvidersFrom(RouterModule.forRoot(routes)) // Import routing providers
+  ]
+});
