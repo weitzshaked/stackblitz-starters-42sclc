@@ -1,1 +1,57 @@
 /* Add application styles & imports to this file! */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+img {
+    max-width: 100%;
+}
+
+.banner {
+    margin-block-end: -90px;
+    max-width: 90%;
+}
+
+.input-container {
+    position: relative;
+    width: 35%;
+    margin-inline-start: -25px;
+
+    .material-icons {
+        position: absolute;
+        top: 50%;
+        right: 10px; /* Adjust as needed */
+        transform: translateY(-50%);
+        color: #001AFF; /* Icon color */
+    }
+}
+
+input::placeholder {
+    color: #001AFF;
+  }  
+
+.form-control {
+    padding: 10px;
+    border: 1px solid #001AFF; /* Colored border */
+    border-radius: 20px; /* Rounded corners */
+    outline: none;
+    width: 100%;
+    /* border-image-source: linear-gradient(90.13deg, #001AFF 0.31%, #FF00D6 99.68%); */
+  }
+  
+  .form-control:focus {
+    border-color: #FF00D6; /* Darker border color on focus */
+  }   
+
+
+.table {
+    margin-block-start: 100px;
+    max-width: 90%;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
