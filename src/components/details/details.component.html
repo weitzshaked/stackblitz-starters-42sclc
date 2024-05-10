@@ -9,7 +9,7 @@ src="./images/Header1.png"/>
           <h2>April 21, 2024 at 6:00 a.m. EDT</h2>
           <div class="bar"></div>
           <div class="rating-container">
-            <div *ngFor="let category of categories" class="rating-category">
+            <div *ngFor="let category of categories$ | async" class="rating-category">
               <span class="category-name">{{ category.name }}</span>
               <span class="category-score">{{ category.score }}/1</span>
               <span class="category-percentage">{{ category.percentage }}%</span>

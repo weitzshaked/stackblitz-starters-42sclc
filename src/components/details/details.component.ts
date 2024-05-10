@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LetDirective } from '@ngrx/component';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 export interface RatingCategory {
   name: string;
@@ -12,65 +12,31 @@ export interface RatingCategory {
 } 
 
 export interface Article {
-  id: number;
   title: string;
   platform: string;
-  article_text: string;
-  num_entities: number;
-  num_quotes: number;
-  sentiment_polarity: number;
-  sentiment_subjectivity: number;
-  num_speculations: number;
-  article_length: number;
-  avg_sentence_length: number;
-  num_adjectives: number;
-  num_numerical_data: number;
-  readability: number;
-  headline_relevance: number;
-  topic_score: number;
-  scaled_num_entities: number;
-  scaled_num_quotes: number;
-  scaled_sentiment_polarity: number;
-  scaled_sentiment_subjectivity: number;
-  scaled_num_speculations: number;
-  scaled_article_length: number;
-  scaled_avg_sentence_length: number;
-  scaled_num_adjectives: number;
-  scaled_num_numerical_data: number;
-  scaled_readability: number;
-  scaled_headline_relevance: number;
-  trustworthy_rate: number;
+  factuality: number;
+  objectivity: number; 
+  comprehensiveness: number; 
+  depth: number; 
+  language: number; 
+  structure: number; 
+  headline: number; 
+  credibility: number; 
+  bias: number; 
 }
 
 const article: Article = {
-  id: 1,
   title: "RFK Jr. rarely mentions abortion — and sends mixed signals when he does",
   platform: "WashingtonPost",
-  article_text: "... (full article text here) ...", // Replace with actual text
-  num_entities: 133,
-  num_quotes: 69,
-  sentiment_polarity: 0.11429,
-  sentiment_subjectivity: 0.407875,
-  num_speculations: 7,
-  article_length: 12848,
-  avg_sentence_length: 145.0227,
-  num_adjectives: 164,
-  num_numerical_data: 37,
-  readability: 56.59,
-  headline_relevance: 0,
-  topic_score: 1,
-  scaled_num_entities: 0.188571,
-  scaled_num_quotes: 0.394286,
-  scaled_sentiment_polarity: 0.546628,
-  scaled_sentiment_subjectivity: 0.42311,
-  scaled_num_speculations: 0.21875,
-  scaled_article_length: 0.197156,
-  scaled_avg_sentence_length: 0.165821,
-  scaled_num_adjectives: 0.202736,
-  scaled_num_numerical_data: 0.126712,
-  scaled_readability: 0.722529,
-  scaled_headline_relevance: 0,
-  trustworthy_rate: 0.430922
+  factuality: 0.85,
+  objectivity: 0.7,
+  comprehensiveness: 0.9,
+  depth: 0.65,
+  language: 0.8,
+  structure: 0.95,
+  headline: 0.75,
+  credibility: 0.8,
+  bias: 0.3  
 };
 
 @Component({
@@ -83,15 +49,10 @@ const article: Article = {
 })
 export class IndexDetailsComponent implements OnInit {
   private _indexDetails$ = new BehaviorSubject<Article>(article).asObservable();// new Observable<Article>();
+  private _catagories$ = new BehaviorSubject<RatingCategory[]>([]);
 
   public indexDetails$ = this._indexDetails$;
-
-  public categories: RatingCategory[] = [
-    { name: 'Factuality', score: 0.5, percentage: 50, level: 'Moderate' },
-    { name: 'Objectivity', score: 0.5, percentage: 50, level: 'Moderate' },
-    { name: 'Bias', score: 0.5, percentage: 50, level: 'Low' },
-    { name: 'Depth', score: 0.5, percentage: 50, level: 'High' },
-  ];
+  public categories$ = this._catagories$.asObservable();
 
   constructor(private router: Router) {
     const navigationState = this.router.getCurrentNavigation()?.extras.state as {
@@ -101,5 +62,16 @@ export class IndexDetailsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this._catagories$.next([
+      { name: 'Factuality', score: article.factuality, percentage: 50, level: 'Moderate' },
+      { name: 'Objectivity', score: article.objectivity, percentage: 50, level: 'Moderate' },
+      { name: 'Comprehensiveness', score: article.comprehensiveness, percentage: 50, level: 'Moderate' },
+      { name: 'Depth', score: article.depth, percentage: 50, level: 'High' },
+      { name: 'Structure', score: article.structure, percentage: 50, level: 'High'},
+      { name: 'Headline relevance', score: article.headline, percentage: 50, level: 'Low' },
+      { name: 'Credability', score: article.credibility, percentage: 50, level: 'High' },
+      { name: 'Language', score: article.language, percentage: 50, level: 'High'},
+      { name: 'Bias', score: article.bias, percentage: 50, level: 'Low' },
+    ]);
   }
 }
