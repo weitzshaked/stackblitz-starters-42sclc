@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LetDirective } from '@ngrx/component';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { PercentageBarComponent } from '../percentage-bar.component';
 
 export interface RatingCategory {
   name: string;
@@ -42,7 +43,7 @@ const article: Article = {
 @Component({
     selector: 'index-details',
     standalone: true,
-    imports: [CommonModule, LetDirective],
+    imports: [CommonModule, LetDirective, PercentageBarComponent],
     templateUrl: './details.component.html',
     styleUrls: ['./details.component.less'],
     changeDetection: ChangeDetectionStrategy.OnPush,

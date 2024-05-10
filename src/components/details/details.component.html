@@ -7,7 +7,12 @@ src="./images/Header1.png"/>
           <a class="header-link" href="https://www.washingtonpost.com/..."> </a>
           <h1 class="title">{{ aaa?.title }}</h1>
           <h2>April 21, 2024 at 6:00 a.m. EDT</h2>
-          <div class="bar"></div>
+          <app-percentage-bar
+  [leftPercentage]="53"
+  [rightPercentage]="47"
+  [leftLabel]="'Clear delivery'"
+  [rightLabel]="'Misleading delivery'">
+</app-percentage-bar>
           <div class="rating-container">
             <div *ngFor="let category of categories$ | async" class="rating-category">
               <span class="category-name">{{ category.name }}</span>
