@@ -1,27 +1,30 @@
 import { Component } from '@angular/core';
-import { RouterModule, provideRouter } from '@angular/router';
+import { Routes, RouterModule, RouterOutlet, provideRouter } from '@angular/router';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 import { HomeComponent } from './components/home/home.component'
-import { DetailsComponent } from './components/details/details.component';
+import { IndexDetailsComponent } from './components/details/details.component';
 
 import 'zone.js';
+
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'details', component: IndexDetailsComponent },
+]
 
 @Component({
   selector: 'app-root',
   standalone: true,
   templateUrl: './main.component.html',
-  imports: [RouterModule],
+  imports: [CommonModule, RouterOutlet, RouterModule]
 })
-export class App {
+export class App {  
   name = 'Angular';
 }
 
 bootstrapApplication(App, {
   providers: [
-    provideRouter([
-      { path: '', component: HomeComponent },
-      { path: 'details', component: DetailsComponent },
-    ])
+    provideRouter(routes)
   ]
 });
