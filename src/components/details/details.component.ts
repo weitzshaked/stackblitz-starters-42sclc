@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LetDirective } from '@ngrx/component';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { PercentageBarComponent } from '../percentage-bar.component';
+import { PercentageBarComponent } from '../percentage-bar/percentage-bar.component';
 
 export interface RatingCategory {
   name: string;

@@ -1,0 +1,14 @@
+<div class="bar-container">
+    <div class="bar"
+         [style.width.%]="leftPercentage"
+         [style.background-color]="leftColor">
+    </div>
+    <div class="bar"
+         [style.width.%]="rightPercentage"
+         [style.background-color]="rightColor">
+    </div>
+  </div>
+  <div class="labels">
+    <span [style.color]="leftColor">{{ leftLabel }} {{ leftPercentage }}%</span>
+    <span [style.color]="rightColor">{{ rightLabel }} {{ rightPercentage }}%</span>
+  </div>
