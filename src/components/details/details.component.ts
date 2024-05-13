@@ -51,6 +51,7 @@ const article: Article = {
 export class IndexDetailsComponent implements OnInit {
   private _indexDetails$ = new BehaviorSubject<Article>(article).asObservable();// new Observable<Article>();
   private _catagories$ = new BehaviorSubject<RatingCategory[]>([]);
+  private _jsonData: any;
 
   public indexDetails$ = this._indexDetails$;
   public categories$ = this._catagories$.asObservable();
@@ -74,5 +75,28 @@ export class IndexDetailsComponent implements OnInit {
       { name: 'Language', score: article.language, percentage: 50, level: 'High'},
       { name: 'Bias', score: article.bias, percentage: 50, level: 'Low' },
     ]);
+  }
+
+  public onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = (evt: any) => {
+        try {
+          this._jsonData = JSON.parse(evt.target.result);
+          // Now you can use the parsed JSON data
+          console.log(this._jsonData);
+        } catch (e) {
+          console.error('Error parsing JSON:', e);
+          // Handle error, e.g., display error message to the user
+        }
+      };
+      reader.onerror = (evt) => {
+        console.error('Error reading file:', evt);
+        // Handle error, e.g., display error message to the user
+      };
+    }
   }
 }
