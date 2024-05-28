@@ -7,41 +7,36 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as d3 from 'd3';
 
 import { PercentageBarComponent } from '../percentage-bar/percentage-bar.component';
+import { _isNumberValue } from '@angular/cdk/coercion';
+
+export interface Instance {
+  id: string;
+  title: string;
+  platform: string;
+  article_text: string;
+  scaled_num_entities: number;
+  scaled_num_quotes: number;
+  scaled_sentiment_polarity: number;
+  scaled_sentiment_subjectivity: number;
+  scaled_num_speculations: number;
+  scaled_article_length: number;
+  scaled_avg_sentence_length: number;
+  scaled_num_adjectives: number;
+  scaled_num_numerical_data: number;
+  scaled_readability: number;
+  scaled_headline_relevance: number;
+  topic_score: number;
+}
+
+export interface ApiResponse {
+  instances: Instance[];
+}
 
 export interface RatingCategory {
   name: string;
   score: number;
-  percentage: number;
-  level: string;
+  rating: string;
 }
-
-export interface Article {
-  title: string;
-  platform: string;
-  factuality: number;
-  objectivity: number;
-  comprehensiveness: number;
-  depth: number;
-  language: number;
-  structure: number;
-  headline: number;
-  credibility: number;
-  bias: number;
-}
-
-const article: Article = {
-  title: 'RFK Jr. rarely mentions abortion — and sends mixed signals when he does',
-  platform: 'WashingtonPost',
-  factuality: 0.85,
-  objectivity: 0.7,
-  comprehensiveness: 0.9,
-  depth: 0.65,
-  language: 0.8,
-  structure: 0.95,
-  headline: 0.75,
-  credibility: 0.8,
-  bias: 0.3
-};
 
 @Component({
   selector: 'index-details',
@@ -54,12 +49,14 @@ const article: Article = {
 export class IndexDetailsComponent implements OnInit, AfterViewInit {
   private chartContainer = viewChild<ElementRef<HTMLDivElement>>('chart');
 
-  private _indexDetails$ = new BehaviorSubject<Article>(article).asObservable();// new Observable<Article>();
+  private _indexDetails$ = new Subject<Instance>();// new Observable<Instance>();
   private _catagories$ = new BehaviorSubject<RatingCategory[]>([]);
+  private _finalScore$ = new BehaviorSubject<number>(0);
   private _jsonData: any;
 
-  public indexDetails$ = this._indexDetails$;
+  public indexDetails$ = this._indexDetails$.asObservable();
   public categories$ = this._catagories$.asObservable();
+  public finalScore$ = this._finalScore$.asObservable();
 
   constructor(private router: Router) {
     const navigationState = this.router.getCurrentNavigation()?.extras.state as {
@@ -69,17 +66,6 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this._catagories$.next([
-      { name: 'Factuality', score: article.factuality, percentage: 50, level: 'Moderate' },
-      { name: 'Objectivity', score: article.objectivity, percentage: 50, level: 'Moderate' },
-      { name: 'Comprehensiveness', score: article.comprehensiveness, percentage: 50, level: 'Moderate' },
-      { name: 'Depth', score: article.depth, percentage: 50, level: 'High' },
-      { name: 'Structure', score: article.structure, percentage: 50, level: 'High' },
-      { name: 'Headline relevance', score: article.headline, percentage: 50, level: 'Low' },
-      { name: 'Credability', score: article.credibility, percentage: 50, level: 'High' },
-      { name: 'Language', score: article.language, percentage: 50, level: 'High' },
-      { name: 'Bias', score: article.bias, percentage: 50, level: 'Low' },
-    ]);
   }
 
   ngAfterViewInit() {
@@ -255,9 +241,24 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
       reader.readAsText(file, 'UTF-8');
       reader.onload = (evt: any) => {
         try {
-          this._jsonData = JSON.parse(evt.target.result);
+          this._jsonData = JSON.parse(evt.target.result) as ApiResponse;
           // Now you can use the parsed JSON data
           console.log(this._jsonData);
+          const article = this._jsonData.instances[0] as Instance;
+          const weightedScores = this.calculateScore(article);
+          console.log(weightedScores);
+          this._catagories$.next([
+            { name: 'Factuality', score: weightedScores.factuality, rating: this.getRating(weightedScores.factuality * 10) },
+            { name: 'Objectivity', score: weightedScores.objectivity, rating: this.getRating(weightedScores.objectivity * 10) },
+            { name: 'Comprehensiveness', score: weightedScores.comprehensiveness, rating: this.getRating(weightedScores.comprehensiveness * 10) },
+            { name: 'Depth', score: weightedScores.depth, rating: this.getRating(weightedScores.depth * 10) },
+            { name: 'Structure', score: weightedScores.structure, rating: this.getRating(weightedScores.structure * 10) },
+            { name: 'Headline relevance', score: weightedScores.headline, rating: this.getRating(weightedScores.headline * 10) },
+            { name: 'Credability', score: weightedScores.credibility, rating: this.getRating(weightedScores.credibility * 10) },
+            { name: 'Language', score: weightedScores.language, rating: this.getRating(weightedScores.language * 10) },
+            { name: 'Bias', score: weightedScores.bias, rating: this.getRating(weightedScores.bias * 10)},
+          ]);
+          this._indexDetails$.next(article);
         } catch (e) {
           console.error('Error parsing JSON:', e);
           // Handle error, e.g., display error message to the user
@@ -271,20 +272,7 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
   }
 
   // https://github.com/littleJamieZ/The-Aletheia-Index/blob/main/score.py
-  private calculateScore(features: any = {
-    scaled_num_entities: 0.6292134831460674,
-    scaled_num_quotes: 0.4642857142857143,
-    scaled_sentiment_polarity: 0.5176096934890906,
-    scaled_sentiment_subjectivity: 1.0,
-    scaled_num_speculations: 0.16666666666666666,
-    scaled_article_length: 0.5933622365076993,
-    scaled_avg_sentence_length: 0.6655516175903258,
-    scaled_num_adjectives: 0.22413793103448276,
-    scaled_num_numerical_data: 0.20512820512820512,
-    scaled_readability: 0.3647890758351621,
-    scaled_headline_relevance: 0.0,
-    topic_score: 0.0
-  }) {
+  private calculateScore(features: Instance) {
     const weights = {
       factuality: 0.1,
       objectivity: 0.1,
@@ -300,15 +288,15 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
     // Map each feature to its category and calculate the weighted score
     // Update the features with their scaled names as per the CSV
     const weightedScores = {
-      factuality: (features.scaled_num_entities + features.scaled_num_quotes - features.scaled_num_speculations) * weights.factuality,
-      objectivity: (1 - features.scaled_sentiment_subjectivity) * weights.objectivity,
-      comprehensiveness: features.topic_score * weights.comprehensiveness,  // Assuming scaled_topic_score exists
-      depth: (features.scaled_avg_sentence_length + features.scaled_article_length) * weights.depth,
-      language: features.scaled_num_adjectives * weights.language,
-      structure: features.scaled_readability * weights.structure,
-      headline: features.scaled_headline_relevance * weights.headline,
-      credibility: (features.scaled_num_numerical_data + features.scaled_num_speculations) * weights.credibility,
-      bias: (1 - features.scaled_sentiment_polarity) * weights.bias
+      factuality: (this.truncate(features.scaled_num_entities) + this.truncate(features.scaled_num_quotes) - this.truncate(features.scaled_num_speculations)) * weights.factuality,
+      objectivity: (1 - this.truncate(features.scaled_sentiment_subjectivity)) * weights.objectivity,
+      comprehensiveness: this.truncate(features.topic_score) * weights.comprehensiveness,  // Assuming scaled_topic_score exists
+      depth: (this.truncate(features.scaled_avg_sentence_length) + this.truncate(features.scaled_article_length)) * weights.depth,
+      language: this.truncate(features.scaled_num_adjectives) * weights.language,
+      structure: this.truncate(features.scaled_readability) * weights.structure,
+      headline: this.truncate(features.scaled_headline_relevance) * weights.headline,
+      credibility: (this.truncate(features.scaled_num_numerical_data) + this.truncate(features.scaled_num_speculations)) * weights.credibility,
+      bias: (1 - this.truncate(features.scaled_sentiment_polarity)) * weights.bias
     }
 
     // Sum the weighted scores for the final score
@@ -316,7 +304,34 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
 
     // Normalize the final score to be out of 1
     const normalizedFinalScore = finalScore / Object.values(weights).reduce((a, b) => a + b, 0);
+    this._finalScore$.next(normalizedFinalScore * 100);
 
     return weightedScores;
+  }
+
+  public truncate(value: number): number {
+    return parseFloat((Math.floor(value * 100) / 100).toFixed(2));
+  }
+
+  public getRating(score: number) {
+    const percentage = score * 100;
+    if (percentage >= 0 && percentage <= 40) {
+      return "Low";
+    } else if (percentage > 40 && percentage <= 50) {
+      return "Moderate";
+    } else if (percentage > 50 && percentage <= 100) {
+      return "High";
+    } else {
+      return "Invalid"; // Handle invalid percentages
+    }
+  }
+
+  public getRatingClass(rating: string, inverse = false){
+    const ratingClass = rating.toLocaleLowerCase();
+    if (ratingClass !== 'moderate' && inverse) {
+      return ratingClass === 'low' ? 'high' : 'low';
+    }
+
+    return ratingClass;
   }
 }
