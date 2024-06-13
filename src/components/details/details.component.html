@@ -6,29 +6,27 @@ src="./images/Header1.png"/>
   <input type="file" id="file-upload" (change)="onFileSelected($event)" accept=".json">
 </form>
 </div>
-<div class="container">
-    <div class="container" *ngIf="indexDetails$ | async as indexDetails">
-        <div class="left-column" >
-          <a class="header-link" href="https://www.washingtonpost.com/..."> </a>
-          <h1 class="title">{{ indexDetails?.title }}</h1>
-          <!-- <h2>April 21, 2024 at 6:00 a.m. EDT</h2> -->
-          <app-percentage-bar *ngIf="finalScore$ | async as finalScore"
-          [leftPercentage]="finalScore"
-          [rightPercentage]="100 - finalScore"
-          [leftLabel]="'Clear delivery'"
-          [rightLabel]="'Misleading delivery'">
-          </app-percentage-bar>
-          <div class="rating-container">
-            <div *ngFor="let category of categories$ | async" class="rating-category">
-              <span class="column">{{ category.name }}</span>
-              <span class="column">{{ (truncate(category.score) * 10).toFixed(2) }}/1</span>
-              <span class="column">{{ truncate(category.score) * 1000 }}%</span>
-              <span class="" [ngClass]="getRatingClass(category.rating, ['Language', 'Bias'].includes(category.name))">{{ category.rating}}</span>
-            </div>
-          </div>
-        </div>
-        <div #chart class="right-column">
-          <!-- Content for the right column box -->
+<div class="container" *ngIf="indexDetails$ | async as indexDetails">
+    <div class="left-column" >
+      <a class="header-link" href="https://www.washingtonpost.com/..."> </a>
+      <h1 class="title">{{ indexDetails?.title }}</h1>
+      <!-- <h2>April 21, 2024 at 6:00 a.m. EDT</h2> -->
+      <app-percentage-bar *ngIf="finalScore$ | async as finalScore"
+      [leftPercentage]="finalScore"
+      [rightPercentage]="100 - finalScore"
+      [leftLabel]="'Clear delivery'"
+      [rightLabel]="'Misleading delivery'">
+      </app-percentage-bar>
+      <div class="rating-container">
+        <div *ngFor="let category of categories$ | async" class="rating-category">
+          <span class="column">{{ category.name }}</span>
+          <span class="column">{{ (truncate(category.score) * 10).toFixed(2) }}/1</span>
+          <span class="column">{{ truncate(category.score) * 1000 }}%</span>
+          <span class="category-level" [ngClass]="getRatingClass(category.rating, ['Language', 'Bias'].includes(category.name))">{{ category.rating}}</span>
         </div>
       </div>
+    </div>
+    <div #chart class="right-column">
+      <!-- Content for the right column box -->
+    </div>
 </div>
