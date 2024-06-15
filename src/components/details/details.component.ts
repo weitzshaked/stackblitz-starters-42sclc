@@ -204,6 +204,7 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
     const width = chartContainer.offsetWidth - marginRight - marginLeft;
     const height = chartContainer.offsetHeight - marginTop - marginBottom;
 
+    d3.select('svg').remove();
     const svg = d3.select('.right-column').append('svg')
     .attr("viewBox", [0, 0, width, height * 1.08])
     .attr("width", width)
