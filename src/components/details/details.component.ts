@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnInit, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
 import { LetDirective } from '@ngrx/component';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as d3 from 'd3';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { PercentageBarComponent } from '../percentage-bar/percentage-bar.component';
-import { _isNumberValue } from '@angular/cdk/coercion';
 
 export interface Instance {
   id: string;
@@ -41,18 +44,25 @@ export interface RatingCategory {
 @Component({
   selector: 'index-details',
   standalone: true,
-  imports: [CommonModule, LetDirective, PercentageBarComponent],
+  imports: [CommonModule, LetDirective, PercentageBarComponent, FormsModule, MatFormFieldModule, MatInputModule, MatIconModule],
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IndexDetailsComponent implements OnInit, AfterViewInit {
-  private chartContainer = viewChild<ElementRef<HTMLDivElement>>('chart');
+export class IndexDetailsComponent implements OnInit {
+  @ViewChild('chart') set content(content: ElementRef) {
+    if(content) { // initially setter gets called with undefined
+        this.createChart(content.nativeElement);
+    }
+  }
+  private articleLink: string = '';
 
   private _indexDetails$ = new Subject<Instance>();// new Observable<Instance>();
   private _catagories$ = new BehaviorSubject<RatingCategory[]>([]);
   private _finalScore$ = new BehaviorSubject<number>(0);
-
+  private _isLoading$ = new BehaviorSubject<boolean>(false);
+  
+  public isLoading$ = this._isLoading$.asObservable();
   public indexDetails$ = this._indexDetails$.asObservable();
   public categories$ = this._catagories$.asObservable();
   public finalScore$ = this._finalScore$.asObservable();
@@ -61,49 +71,67 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
     const navigationState = this.router.getCurrentNavigation()?.extras.state as {
       inputValue: string;
     };
-    const articleLink = navigationState?.inputValue || ''; // Access passed data
+    this.articleLink = navigationState?.inputValue || ''; // Access passed data
+  }
+
+  public onInputChange(event: any){
+    if(event && event.target.value) {
+      this.articleLink = event.target.value;
+    }
+  }
+
+  public onInputEnter() {
+    this._isLoading$.next(true);
+    fetch('https://aletheiaindex.azurewebsites.net/scrap', { 
+      method: 'POST', 
+      body: JSON.stringify({
+          url: this.articleLink,//'https://www.usatoday.com/story/money/2024/06/13/tyson-foods-cfo-suspended-arrest/74088703007/',
+      }), 
+      headers: { "Content-Type": "application/json" },
+      }).then(r => r.json()).then((data: any) => {
+        const article = this.getAllDetails(data);
+        this._indexDetails$.next(article);
+      }).finally(() => this._isLoading$.next(false));
+    // fetch('./images/input_data.json').then(r => r.json()).then((data: ApiResponse) => {
+    //   const article = this.getAllDetails(data.instances[0]);
+    //   this._indexDetails$.next(article);
+    // });
   }
 
   ngOnInit(): void {
     // create initial data
-    fetch('./images/input_data.json').then(r => r.json()).then((data: any) => {
-          const article = this.getAllDetails(data);
-          this._indexDetails$.next(article);
-    });
+    // fetch('./images/input_data.json').then(r => r.json()).then((data: any) => {
+    //       const article = this.getAllDetails(data);
+    //       this._indexDetails$.next(article);
+    // });
   }
 
-  ngAfterViewInit() {
-    this._indexDetails$.subscribe(
-      () => this.createChart()
-    );
-  }
+  // public onFileSelected(event: any): void {
+  //   const file: File = event.target.files[0];
 
-  public onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.readAsText(file, 'UTF-8');
+  //     reader.onload = (evt: any) => {
+  //       try {
+  //         const _jsonData = JSON.parse(evt.target.result) as ApiResponse;
+  //         const article = this.getAllDetails(_jsonData);
+  //         this._indexDetails$.next(article);
+  //       } catch (e) {
+  //         console.error('Error parsing JSON:', e);
+  //         // Handle error, e.g., display error message to the user
+  //       }
+  //     };
+  //     reader.onerror = (evt) => {
+  //       console.error('Error reading file:', evt);
+  //       // Handle error, e.g., display error message to the user
+  //     };
+  //   }
+  // }
 
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsText(file, 'UTF-8');
-      reader.onload = (evt: any) => {
-        try {
-          const _jsonData = JSON.parse(evt.target.result) as ApiResponse;
-          const article = this.getAllDetails(_jsonData);
-          this._indexDetails$.next(article);
-        } catch (e) {
-          console.error('Error parsing JSON:', e);
-          // Handle error, e.g., display error message to the user
-        }
-      };
-      reader.onerror = (evt) => {
-        console.error('Error reading file:', evt);
-        // Handle error, e.g., display error message to the user
-      };
-    }
-  }
-
-  private getAllDetails(_jsonData: ApiResponse): Instance {
+  private getAllDetails(article: Instance): Instance {
     // Now you can use the parsed JSON data
-    const article = _jsonData.instances[0] as Instance;
+    // const article = _jsonData.instances[0] as Instance;
     const weightedScores = this.calculateScore(article);
     this._catagories$.next([
       { name: 'Factuality', score: weightedScores.factuality, rating: this.getRating(weightedScores.factuality * 10) },
@@ -183,10 +211,10 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
     return ratingClass;
   }
 
-  private createChart(): void {
-    const chartContainer = this.chartContainer()?.nativeElement;
+  private createChart(chartContainer: any): void {
 
     if (!chartContainer) {
+      console.log('no chart container');
       return;
     }
 
@@ -257,5 +285,5 @@ export class IndexDetailsComponent implements OnInit, AfterViewInit {
       .attr('width', x.bandwidth())
       .attr('height', (d) => y(0) - y(1 - d.score))
       .attr('fill', '#FF00D6');
-  };
+  }
 }
