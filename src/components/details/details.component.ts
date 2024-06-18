@@ -28,7 +28,8 @@ export interface Instance {
   scaled_num_numerical_data: number;
   scaled_readability: number;
   scaled_headline_relevance: number;
-  topic_score: number;
+  // topic_score: number;
+  scaled_topic_score: number;
 }
 
 export interface ApiResponse {
@@ -175,10 +176,11 @@ export class IndexDetailsComponent implements OnInit {
 
     // Map each feature to its category and calculate the weighted score
     // Update the features with their scaled names as per the CSV
+    debugger;
     const weightedScores = {
       factuality: (this.truncate(features.scaled_num_entities) + this.truncate(features.scaled_num_quotes) - this.truncate(features.scaled_num_speculations)) * weights.factuality,
       objectivity: (1 - this.truncate(features.scaled_sentiment_subjectivity)) * weights.objectivity,
-      comprehensiveness: this.truncate(features.topic_score) * weights.comprehensiveness,  // Assuming scaled_topic_score exists
+      comprehensiveness: this.truncate(features.scaled_topic_score) * weights.comprehensiveness,  // Assuming scaled_topic_score exists
       depth: (this.truncate(features.scaled_avg_sentence_length) + this.truncate(features.scaled_article_length)) * weights.depth,
       language: this.truncate(features.scaled_num_adjectives) * weights.language,
       structure: this.truncate(features.scaled_readability) * weights.structure,
