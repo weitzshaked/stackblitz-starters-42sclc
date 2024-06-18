@@ -50,6 +50,7 @@ export interface RatingCategory {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IndexDetailsComponent implements OnInit {
+  private chartContainer = viewChild<ElementRef<HTMLDivElement>>('chart');
   @ViewChild('chart') set content(content: ElementRef) {
     if(content) { // initially setter gets called with undefined
         this.createChart(content.nativeElement);
@@ -72,6 +73,9 @@ export class IndexDetailsComponent implements OnInit {
       inputValue: string;
     };
     this.articleLink = navigationState?.inputValue || ''; // Access passed data
+    // if (this.articleLink) {
+    //   this.onInputEnter();
+    // }
   }
 
   public onInputChange(event: any){
@@ -82,20 +86,28 @@ export class IndexDetailsComponent implements OnInit {
 
   public onInputEnter() {
     this._isLoading$.next(true);
-    fetch('https://aletheiaindex.azurewebsites.net/scrap', { 
-      method: 'POST', 
-      body: JSON.stringify({
-          url: this.articleLink,//'https://www.usatoday.com/story/money/2024/06/13/tyson-foods-cfo-suspended-arrest/74088703007/',
-      }), 
-      headers: { "Content-Type": "application/json" },
-      }).then(r => r.json()).then((data: any) => {
-        const article = this.getAllDetails(data);
-        this._indexDetails$.next(article);
-      }).finally(() => this._isLoading$.next(false));
+    // fetch('https://aletheiaindex.azurewebsites.net/scrap', { 
+    //   method: 'POST', 
+    //   body: JSON.stringify({
+    //       url: this.articleLink,//'https://www.usatoday.com/story/money/2024/06/13/tyson-foods-cfo-suspended-arrest/74088703007/',
+    //   }), 
+    //   headers: { "Content-Type": "application/json" },
+    //   }).then(r => r.json()).then((data: any) => {
+    //     const article = this.getAllDetails(data);
+    //     this._indexDetails$.next(article);
+    //   }).finally(() => this._isLoading$.next(false));
+
+
     // fetch('./images/input_data.json').then(r => r.json()).then((data: ApiResponse) => {
     //   const article = this.getAllDetails(data.instances[0]);
     //   this._indexDetails$.next(article);
-    // });
+    // }).finally(() => this._isLoading$.next(false));
+
+      fetch('./images/cache.json').then(r => r.json()).then((data) => {
+      const article = this.getAllDetails(data[this.articleLink]);
+      this._indexDetails$.next(article);
+      this.createChart(this.chartContainer()?.nativeElement);
+    }).finally(() => this._isLoading$.next(false));
   }
 
   ngOnInit(): void {
@@ -212,7 +224,6 @@ export class IndexDetailsComponent implements OnInit {
   }
 
   private createChart(chartContainer: any): void {
-
     if (!chartContainer) {
       console.log('no chart container');
       return;

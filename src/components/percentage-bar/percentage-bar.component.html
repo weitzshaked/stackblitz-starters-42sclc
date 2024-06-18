@@ -9,6 +9,14 @@
     </div>
   </div>
   <div class="labels">
-    <span [style.color]="leftColor">{{ leftPercentage }}%  <br> {{ leftLabel }}</span>
-    <span [style.color]="rightColor">{{ rightPercentage }}% <br> {{ rightLabel }}</span>
+    <span [style.color]="leftColor" class="percentage">{{ leftPercentage }}% 
+          <span class="label">
+               <br> {{ leftLabel }}
+          </span> 
+     </span>
+    <span [style.color]="rightColor" class="percentage">{{ rightPercentage }}% 
+          <span class="label">
+               <br> {{ rightLabel }}
+          </span>
+     </span> 
   </div>
