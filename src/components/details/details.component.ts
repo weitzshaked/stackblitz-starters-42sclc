@@ -11,6 +11,7 @@ import * as d3 from 'd3';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { PercentageBarComponent } from '../percentage-bar/percentage-bar.component';
+import { CACHE } from './cache';
 
 export interface Instance {
   id: string;
@@ -104,11 +105,17 @@ export class IndexDetailsComponent implements OnInit {
     //   this._indexDetails$.next(article);
     // }).finally(() => this._isLoading$.next(false));
 
-      fetch('./images/cache.json').then(r => r.json()).then((data) => {
-      const article = this.getAllDetails(data[this.articleLink]);
-      this._indexDetails$.next(article);
-      this.createChart(this.chartContainer()?.nativeElement);
-    }).finally(() => this._isLoading$.next(false));
+      if (this.articleLink in CACHE) {
+        const article = this.getAllDetails((CACHE as any)[this.articleLink]);
+        this._indexDetails$.next(article);
+        this.createChart(this.chartContainer()?.nativeElement);
+      }
+      this._isLoading$.next(false);
+    //   fetch('./images/cache.json').then(r => r.json()).then((data) => {
+    //   const article = this.getAllDetails(data[this.articleLink]);
+    //   this._indexDetails$.next(article);
+    //   this.createChart(this.chartContainer()?.nativeElement);
+    // }).finally(() => this._isLoading$.next(false));
   }
 
   ngOnInit(): void {
